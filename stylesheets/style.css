@@ -626,21 +626,21 @@ h2 {
   }
 
   .about h1 {
-    margin-top: 0;
-    font-size: 38px;
+    margin-top: 10px;
+    font-size: 30px;
     letter-spacing: 0;
+    text-align: left;
+    padding: 10px 15px;
   }
 
   .about h2 {
-    font-size: 24px;
+    font-size: 16px;
+    padding: 10px 15px;
+    margin-bottom: 0px;
   }
 
   .about-img {
-    width: 100%;
-  }
-
-  .about-img img {
-    left: 8%;
+    display: none;
   }
 
 
