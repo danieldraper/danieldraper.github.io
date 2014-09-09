@@ -1,0 +1,31 @@
+<html>
+  <head>
+    <title>Daniel Draper</title>
+
+    <meta charset="utf-8">
+
+    <link href="http://fonts.googleapis.com/css?family=Open+Sans:300italic,400,600,700" rel="stylesheet" type="text/css">
+    <link href="../stylesheets/calendar.css" rel="stylesheet">
+    <link href="http://cdnjs.cloudflare.com/ajax/libs/fullcalendar/2.1.1/fullcalendar.min.css" rel="stylesheet">
+    <link href="http://cdnjs.cloudflare.com/ajax/libs/fullcalendar/2.1.1/fullcalendar.print.css" rel="stylesheet" media="print">
+  </head>
+
+
+  <body>
+
+    <div id="calendar"></div>
+
+    <script type="text/javascript" src="http://code.jquery.com/jquery-2.1.1.min.js"></script>
+    <script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/moment.js/2.8.2/moment-with-locales.min.js"></script>
+    <script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/fullcalendar/2.1.1/fullcalendar.min.js"></script>
+
+    <script type="text/javascript">
+      $(function() {
+        $("#calendar").fullCalendar({
+          weekNumbers: true,
+          events: "https://www.google.com/calendar/feeds/coderhulk.com_73avlcgh6ho328h5vbc8p5kqug%40group.calendar.google.com/public/basic"
+        })
+      })
+    </script>
+  </body>
+</html>
