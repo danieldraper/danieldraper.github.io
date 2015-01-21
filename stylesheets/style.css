@@ -521,9 +521,8 @@ h2 {
 .btn .text a {
   color: white;
   display: block;
-  padding: 10px;
   text-decoration: none;
-  padding: 14px 18px;
+  padding: 14px;
 }
 
 .about-container {
