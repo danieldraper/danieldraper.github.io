@@ -644,9 +644,3 @@ h2 {
 
 
 }
-
-@media screen and (max-height: 400px) {
-  .about-img img {
-    bottom: -330px
-  }
-}
