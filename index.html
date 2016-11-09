@@ -13,17 +13,14 @@
 
   <body>
     <div class="about-container">
-      <div class="about-img">
-        <img src="images/daniel.png" alt="daniel">
-      </div>
       <div class="about">
         <h1>Daniel Draper</h1>
         <h2>Senior Web Developer</h2>
         <p>
           Hello, my name is Daniel, I'm a Senior Web Developer with over 9 years
           of experience in web development including agency work, start-up,
-          e-commerce and medical. I’ve been involved in all aspects of software
-          development from speaking with the clients in the early stages,
+          e-commerce, medical and fintech. I’ve been involved in all aspects
+          of software development from speaking with the clients in the early stages,
           planning, through to development and production management and review,
           using a variety of tools and technologies along the way.
         </p>
@@ -38,21 +35,5 @@
         </div>
       </div>
     </div>
-
-    <script src="http://code.jquery.com/jquery-1.11.2.min.js"></script>
-    <script type="text/javascript">
-      $(function() {
-
-        $(window).on("resize", function() {
-          var $img            = $('.about-img img');
-          var viewport_height = $(window).height();
-
-          viewport_height < $img.height() ?
-            $img.offset({ top: 0 }) :
-            $img.offset({ top: viewport_height - $img.height() });
-        }).resize();
-
-      });
-    </script>
   </body>
 </html>
