@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Daniel Draper - Travel Plan</title>
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <link href="https://fonts.googleapis.com/css?family=Montserrat:300,400,500,600,700" rel="stylesheet">
+  <link href="stylesheets/normalize.css" rel="stylesheet">
+  <link href="stylesheets/style.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.4.0/dist/leaflet.css" integrity="sha512-puBpdR0798OZvTTbP4A8Ix/l+A4dHDD0DGqYW6RQ+9jxkRFclaxxQb/SJAWZfWAkuyeQUytO7+7N4QKrDh+drA==" crossorigin="" />
+  <script src="https://unpkg.com/leaflet@1.4.0/dist/leaflet.js" integrity="sha512-QVftwZFqvtRNi0ZyCtsznlKSWOStnDORoefr1enyq5mVL4tmKB3S/EnC3rRJcxCPavG10IcrVGSmPh6Qw5lwrg==" crossorigin=""></script>
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.23.0/moment.min.js"></script>
+
+  <style>
+    html, body { width: 100%; height: 100%; }
+    #map { height: 100%; }
+  </style>
+</head>
+
+<body>
+  <div id="map"></div>
+
+  <script>
+    var map = L.map("map").setView([-31.0828772, 145.9488688], 6.5)
+    L.tileLayer("https://maps.wikimedia.org/osm-intl/{z}/{x}/{y}{r}.png", {
+      attribution: "<a href=\"https://wikimediafoundation.org/wiki/Maps_Terms_of_Use\">Wikimedia</a>",
+      minZoom: 1,
+      maxZoom: 19
+    }).addTo(map)
+
+    updateMap()
+    setInterval(function () {
+      updateMap()
+    }, 5000)
+
+    function updateMap() {
+      axios({
+        method: "get",
+        url: "https://private-beacon.herokuapp.com/api/v1/locations",
+        responseType: "json"
+      })
+        .then(function (response) {
+          response.data.forEach(function (location) {
+            var marker = L.marker([location.latitude, location.longitude]).addTo(map);
+
+            var updatedAt = moment.unix(location.capturedAt).startOf('second').fromNow();
+            var speed = location.speed * 3.6
+
+            marker.bindPopup("<b>Updated " + updatedAt + "</b><br>Speed (KM/h): " + speed + "<br>Altitude (M): " + location.altitude + "<br>Latitude: " + location.latitude + "<br>Longitude: " + location.longitude).openPopup()
+            centerMapOnMarker(marker)
+          })
+        })
+    }
+
+    function centerMapOnMarker(marker) {
+        var latLngs = [marker.getLatLng()];
+        var markerBounds = L.latLngBounds(latLngs);
+        map.fitBounds(markerBounds);
+      }
+  </script>
+</body>
+
+</html>
