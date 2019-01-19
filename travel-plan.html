@@ -25,7 +25,9 @@
   <div id="map"></div>
 
   <script>
+    var marker = null
     var map = L.map("map").setView([-31.0828772, 145.9488688], 6.5)
+
     L.tileLayer("https://maps.wikimedia.org/osm-intl/{z}/{x}/{y}{r}.png", {
       attribution: "<a href=\"https://wikimediafoundation.org/wiki/Maps_Terms_of_Use\">Wikimedia</a>",
       minZoom: 1,
@@ -44,10 +46,14 @@
         responseType: "json"
       })
         .then(function (response) {
-          response.data.forEach(function (location) {
-            var marker = L.marker([location.latitude, location.longitude]).addTo(map);
+          if (marker != null) {
+            map.removeLayer(marker)
+          }
 
-            var updatedAt = moment.unix(location.capturedAt).startOf('second').fromNow();
+          response.data.forEach(function (location) {
+            marker = L.marker([location.latitude, location.longitude]).addTo(map)
+
+            var updatedAt = moment.unix(location.capturedAt).startOf('second').fromNow()
             var speed = location.speed * 3.6
 
             marker.bindPopup("<b>Updated " + updatedAt + "</b><br>Speed (KM/h): " + speed + "<br>Altitude (M): " + location.altitude + "<br>Latitude: " + location.latitude + "<br>Longitude: " + location.longitude).openPopup()
@@ -57,9 +63,9 @@
     }
 
     function centerMapOnMarker(marker) {
-        var latLngs = [marker.getLatLng()];
-        var markerBounds = L.latLngBounds(latLngs);
-        map.fitBounds(markerBounds);
+        var latLngs = [marker.getLatLng()]
+        var markerBounds = L.latLngBounds(latLngs)
+        map.fitBounds(markerBounds)
       }
   </script>
 </body>
