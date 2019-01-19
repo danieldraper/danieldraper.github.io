@@ -25,21 +25,70 @@
   <div id="map"></div>
 
   <script>
+    var map = null
     var marker = null
-    var map = L.map("map").setView([-31.0828772, 145.9488688], 6.5)
+    var liveTrack = false
 
-    L.tileLayer("https://maps.wikimedia.org/osm-intl/{z}/{x}/{y}{r}.png", {
-      attribution: "<a href=\"https://wikimediafoundation.org/wiki/Maps_Terms_of_Use\">Wikimedia</a>",
-      minZoom: 1,
-      maxZoom: 19
-    }).addTo(map)
+    var liveTrackControl = L.Control.extend({
+      options: {
+        position: "topleft"
+      },
 
-    updateMap()
-    setInterval(function () {
-      updateMap()
-    }, 5000)
+      onAdd: function (map) {
+        var container = L.DomUtil.create("input")
+        container.type = "button"
+        container.title = "Live Track (Disabled)"
 
-    function updateMap() {
+        container.style.borderRadius = "4px"
+        container.style.lineHeight = "34px"
+        container.style.border = "2px solid rgba(0,0,0,0.2)"
+        container.style.backgroundClip = "padding-box"
+        container.style.backgroundColor = "white"
+        container.style.backgroundImage = "url(\"data:image/svg+xml;charset=utf8,%3Csvg aria-hidden='true' data-prefix='fas' data-icon='location-arrow' class='svg-inline--fa fa-location-arrow fa-w-16' role='img' xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Cpath fill='currentColor' d='M444.52 3.52L28.74 195.42c-47.97 22.39-31.98 92.75 19.19 92.75h175.91v175.91c0 51.17 70.36 67.17 92.75 19.19l191.9-415.78c15.99-38.39-25.59-79.97-63.97-63.97z'%3E%3C/path%3E%3C/svg%3E\")"
+        container.style.backgroundRepeat = "no-repeat"
+        container.style.backgroundSize = "14px 14px"
+        container.style.backgroundPosition = "50% 50%"
+        container.style.width = "34px"
+        container.style.height = "34px"
+
+        container.onmouseover = function() {
+          container.style.backgroundColor = "#f4f4f4"
+        }
+
+        container.onclick = function() {
+          if (liveTrack) {
+            liveTrack = false
+            container.style.backgroundColor = "white"
+            container.title = "Live Track (Disabled)"
+          } else {
+            liveTrack = true
+            container.style.backgroundColor = "#A7E56D"
+            container.title = "Live Track (Enabled)"
+          }
+        }
+
+        return container;
+      }
+    });
+
+    var readyState = function(ev) {
+      map = L.map("map").setView([-31.0828772, 145.9488688], 6.5)
+
+      L.tileLayer("https://maps.wikimedia.org/osm-intl/{z}/{x}/{y}{r}.png", {
+        attribution: "<a href=\"https://wikimediafoundation.org/wiki/Maps_Terms_of_Use\">Wikimedia</a>",
+        minZoom: 1,
+        maxZoom: 19
+      }).addTo(map)
+
+      map.addControl(new liveTrackControl())
+
+      updateMap(true)
+      setInterval(function() {
+        updateMap(liveTrack)
+      }, 10000)
+    }
+
+    var updateMap = function(track) {
       axios({
         method: "get",
         url: "https://private-beacon.herokuapp.com/api/v1/locations",
@@ -57,16 +106,20 @@
             var speed = location.speed * 3.6
 
             marker.bindPopup("<b>Updated " + updatedAt + "</b><br>Speed (KM/h): " + speed + "<br>Altitude (M): " + location.altitude + "<br>Latitude: " + location.latitude + "<br>Longitude: " + location.longitude).openPopup()
-            centerMapOnMarker(marker)
+            centerMapOnMarker(marker, track)
           })
         })
     }
 
-    function centerMapOnMarker(marker) {
-        var latLngs = [marker.getLatLng()]
-        var markerBounds = L.latLngBounds(latLngs)
-        map.fitBounds(markerBounds)
-      }
+    var centerMapOnMarker = function(marker, track) {
+      if (!track) { return }
+
+      var latLngs = [marker.getLatLng()]
+      var markerBounds = L.latLngBounds(latLngs)
+      map.fitBounds(markerBounds)
+    }
+
+    window.addEventListener('DOMContentLoaded', readyState)
   </script>
 </body>
 
