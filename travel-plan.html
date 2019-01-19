@@ -27,6 +27,7 @@
   <script>
     var map = null
     var marker = null
+    var markers = []
     var liveTrack = false
 
     var liveTrackControl = L.Control.extend({
@@ -91,7 +92,8 @@
     var updateMap = function(track) {
       axios({
         method: "get",
-        url: "https://private-beacon.herokuapp.com/api/v1/locations",
+        url: "http://private-beacon.localhost:3000/api/v1/locations",
+        // url: "https://private-beacon.herokuapp.com/api/v1/locations",
         responseType: "json"
       })
         .then(function (response) {
@@ -99,15 +101,25 @@
             map.removeLayer(marker)
           }
 
-          response.data.forEach(function (location) {
-            marker = L.marker([location.latitude, location.longitude]).addTo(map)
+          if (markers.length) {
+            markers.forEach(function(mark) {
+              map.removeLayer(mark)
+            })
+          }
 
-            var updatedAt = moment.unix(location.capturedAt).startOf('second').fromNow()
-            var speed = location.speed * 3.6
+          response.data.forEach(function (location, index, locations) {
+            markers.push([location.latitude, location.longitude])
 
-            marker.bindPopup("<b>Updated " + updatedAt + "</b><br>Speed (KM/h): " + speed + "<br>Altitude (M): " + location.altitude + "<br>Latitude: " + location.latitude + "<br>Longitude: " + location.longitude).openPopup()
-            centerMapOnMarker(marker, track)
+            if (index === locations.length - 1) {
+              marker = L.marker([location.latitude, location.longitude]).addTo(map)
+              var updatedAt = moment.unix(location.capturedAt).startOf('second').fromNow()
+              var speed = Math.max(0, Math.round(location.speed * 3.6))
+              marker.bindPopup("<b>Updated " + updatedAt + "</b><hr>Speed (KM/h): " + speed + "<br>Altitude (M): " + Math.round(location.altitude * 100) / 100 + "<br>Latitude: " + location.latitude + "<br>Longitude: " + location.longitude)//.openPopup()
+            }
           })
+
+          var polyline = L.polyline(markers, { color: 'red' }).addTo(map)
+          centerMapOnMarker(marker, track)
         })
     }
 
