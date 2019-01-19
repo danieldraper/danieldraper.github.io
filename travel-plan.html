@@ -92,8 +92,8 @@
     var updateMap = function(track) {
       axios({
         method: "get",
-        url: "http://private-beacon.localhost:3000/api/v1/locations",
-        // url: "https://private-beacon.herokuapp.com/api/v1/locations",
+        // url: "http://private-beacon.localhost:3000/api/v1/locations",
+        url: "https://private-beacon.herokuapp.com/api/v1/locations",
         responseType: "json"
       })
         .then(function (response) {
