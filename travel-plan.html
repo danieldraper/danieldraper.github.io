@@ -85,6 +85,8 @@
 
       map.addControl(new liveTrackControl())
 
+      fetchCheckpoints()
+
       updateMap(true)
       setInterval(function() {
         updateMap(liveTrack)
@@ -144,6 +146,45 @@
 
           centerMapOnMarker(marker, track)
         })
+    }
+
+    var fetchCheckpoints = function() {
+      axios({
+        method: "get",
+        url: "https://private-beacon.herokuapp.com/api/v1/checkpoints",
+        responseType: "json"
+      })
+        .then(function (response) {
+          response.data.forEach(function (checkpoint, index, checkpoints) {
+            var markerHtmlStyles = `
+              background-color: red;
+              width: 1rem;
+              height: 1rem;
+              display: block;
+              position: relative;
+              border-radius: 3rem 3rem 0;
+              transform: rotate(45deg);
+              border: 1px solid #FFFFFF`
+
+            var icon = L.divIcon({
+              className: "my-custom-pin",
+              iconAnchor: [0, 24],
+              labelAnchor: [-6, 0],
+              popupAnchor: [0, -36],
+              html: `<span style="${markerHtmlStyles}" />`
+            })
+
+            L.marker([checkpoint.latitude, checkpoint.longitude], { icon: icon }).addTo(map)
+              // marker.bindPopup(
+              //   "<b>Updated " + updatedAt + "</b><hr>Speed (KM/h): " + speed +
+              //   "<br>Altitude (M): " + Math.round(location.altitude * 100) / 100 +
+              //   "<br>Latitude: " + location.latitude + "<br>Longitude: " + location.longitude,
+              //   {
+              //     autoPan: false
+              //   }
+              // ).openPopup()
+            })
+          })
     }
 
     var centerMapOnMarker = function(marker, track) {
