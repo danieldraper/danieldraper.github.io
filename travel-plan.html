@@ -18,6 +18,11 @@
   <style>
     html, body { width: 100%; height: 100%; }
     #map { height: 100%; }
+
+    .leaflet-popup-content p {
+      margin-top: 0;
+      margin-bottom: 10px;
+    }
   </style>
 </head>
 
@@ -30,6 +35,7 @@
     var markers = []
     var liveTrack = false
     var polyline = null
+    var checkpointMarkers = []
 
     var liveTrackControl = L.Control.extend({
       options: {
@@ -86,6 +92,9 @@
       map.addControl(new liveTrackControl())
 
       fetchCheckpoints()
+      setInterval(function () {
+        fetchCheckpoints()
+      }, 15000)
 
       updateMap(true)
       setInterval(function() {
@@ -125,7 +134,23 @@
               var updatedAt = moment.unix(location.capturedAt).startOf("second").fromNow()
               var speed = Math.max(0, Math.round(location.speed * 3.6))
 
-              marker = L.marker([location.latitude, location.longitude]).addTo(map)
+              var markerHtmlStyles = `
+                background-color: #257DC9;
+                width: 1rem;
+                height: 1rem;
+                display: block;
+                position: relative;
+                border-radius: 3rem 3rem 0;
+                transform: rotate(45deg);
+                border: 1px solid #FFFFFF`
+
+              var icon = L.divIcon({
+                className: "my-custom-pin",
+                popupAnchor: [3.5, 0],
+                html: `<span style="${markerHtmlStyles}" />`
+              })
+
+              marker = L.marker([location.latitude, location.longitude], { icon: icon }).addTo(map)
               marker.bindPopup(
                 "<b>Updated " + updatedAt + "</b><hr>Speed (KM/h): " + speed +
                 "<br>Altitude (M): " + Math.round(location.altitude * 100) / 100 +
@@ -140,7 +165,7 @@
           polyline = L.polyline(
             markers,
             {
-              color: "red"
+              color: "#257DC9"
             }
           ).addTo(map)
 
@@ -155,9 +180,18 @@
         responseType: "json"
       })
         .then(function (response) {
+          if (checkpointMarkers.length) {
+            checkpointMarkers.forEach(function (mark) {
+              map.removeLayer(mark)
+            })
+            checkpointMarkers = []
+          }
+
           response.data.forEach(function (checkpoint, index, checkpoints) {
+            var backgroundColor = checkpoint.arrived ? "#1CB954" : "red"
+
             var markerHtmlStyles = `
-              background-color: red;
+              background-color: ${backgroundColor};
               width: 1rem;
               height: 1rem;
               display: block;
@@ -168,23 +202,26 @@
 
             var icon = L.divIcon({
               className: "my-custom-pin",
-              iconAnchor: [0, 24],
-              labelAnchor: [-6, 0],
-              popupAnchor: [0, -36],
+              popupAnchor: [3.5, 0],
               html: `<span style="${markerHtmlStyles}" />`
             })
 
-            L.marker([checkpoint.latitude, checkpoint.longitude], { icon: icon }).addTo(map)
-              // marker.bindPopup(
-              //   "<b>Updated " + updatedAt + "</b><hr>Speed (KM/h): " + speed +
-              //   "<br>Altitude (M): " + Math.round(location.altitude * 100) / 100 +
-              //   "<br>Latitude: " + location.latitude + "<br>Longitude: " + location.longitude,
-              //   {
-              //     autoPan: false
-              //   }
-              // ).openPopup()
-            })
+            checkpointMarker = L.marker([checkpoint.latitude, checkpoint.longitude], { icon: icon }).addTo(map)
+            checkpointMarker.bindPopup(
+              "<b style=\"font-size: 1.1rem; margin-bottom: 5px; display: block;\">" + checkpoint.name + "</b>" +
+              "<b>Arrive:</b> " + checkpoint.arriveOn +
+              "<br><b>Departure:</b> " + checkpoint.leaveOn +
+              "<br><b>Contact:</b> " + checkpoint.contactNumber +
+              "<br><br>" + checkpoint.notes,
+              {
+                autoPan: false,
+                autoClose: false
+              }
+            )
+
+            checkpointMarkers.push(checkpointMarker)
           })
+        })
     }
 
     var centerMapOnMarker = function(marker, track) {
