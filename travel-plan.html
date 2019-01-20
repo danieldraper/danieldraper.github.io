@@ -29,6 +29,7 @@
     var marker = null
     var markers = []
     var liveTrack = false
+    var polyline = null
 
     var liveTrackControl = L.Control.extend({
       options: {
@@ -53,6 +54,7 @@
         container.style.height = "34px"
 
         container.onmouseover = function() {
+          if (liveTrack) { return }
           container.style.backgroundColor = "#f4f4f4"
         }
 
@@ -99,26 +101,47 @@
         .then(function (response) {
           if (marker != null) {
             map.removeLayer(marker)
+            marker = null
           }
 
           if (markers.length) {
             markers.forEach(function(mark) {
               map.removeLayer(mark)
             })
+            markers = []
+          }
+
+          if (polyline != null) {
+            map.removeLayer(polyline)
+            polyline = null
           }
 
           response.data.forEach(function (location, index, locations) {
             markers.push([location.latitude, location.longitude])
 
-            if (index === locations.length - 1) {
-              marker = L.marker([location.latitude, location.longitude]).addTo(map)
-              var updatedAt = moment.unix(location.capturedAt).startOf('second').fromNow()
+            if (index == 0) {
+              var updatedAt = moment.unix(location.capturedAt).startOf("second").fromNow()
               var speed = Math.max(0, Math.round(location.speed * 3.6))
-              marker.bindPopup("<b>Updated " + updatedAt + "</b><hr>Speed (KM/h): " + speed + "<br>Altitude (M): " + Math.round(location.altitude * 100) / 100 + "<br>Latitude: " + location.latitude + "<br>Longitude: " + location.longitude)//.openPopup()
+
+              marker = L.marker([location.latitude, location.longitude]).addTo(map)
+              marker.bindPopup(
+                "<b>Updated " + updatedAt + "</b><hr>Speed (KM/h): " + speed +
+                "<br>Altitude (M): " + Math.round(location.altitude * 100) / 100 +
+                "<br>Latitude: " + location.latitude + "<br>Longitude: " + location.longitude,
+                {
+                  autoPan: false
+                }
+              ).openPopup()
             }
           })
 
-          var polyline = L.polyline(markers, { color: 'red' }).addTo(map)
+          polyline = L.polyline(
+            markers,
+            {
+              color: "red"
+            }
+          ).addTo(map)
+
           centerMapOnMarker(marker, track)
         })
     }
