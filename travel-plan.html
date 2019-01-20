@@ -148,6 +148,7 @@
 
     var centerMapOnMarker = function(marker, track) {
       if (!track) { return }
+      if (marker == null) { return }
 
       var latLngs = [marker.getLatLng()]
       var markerBounds = L.latLngBounds(latLngs)
