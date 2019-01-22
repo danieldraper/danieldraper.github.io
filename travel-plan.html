@@ -30,6 +30,8 @@
   <div id="map"></div>
 
   <script>
+    const API_BASE_URL = "https://private-beacon.herokuapp.com/api/v1"
+    // const API_BASE_URL = "http://beacon.localhost:3000/api/v1"
     var map = null
     var marker = null
     var markers = []
@@ -105,7 +107,7 @@
     var updateMap = function(track) {
       axios({
         method: "get",
-        url: "https://private-beacon.herokuapp.com/api/v1/locations",
+        url: API_BASE_URL + "/locations",
         responseType: "json"
       })
         .then(function (response) {
@@ -179,7 +181,7 @@
     var fetchCheckpoints = function() {
       axios({
         method: "get",
-        url: "https://private-beacon.herokuapp.com/api/v1/checkpoints",
+        url: API_BASE_URL + "/checkpoints",
         responseType: "json"
       })
         .then(function (response) {
